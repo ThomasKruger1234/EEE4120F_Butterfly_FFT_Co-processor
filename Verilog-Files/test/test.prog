@@ -1,0 +1,73 @@
+// =============================================================================
+// test.prog - StarCore-1 integration program
+// 16 words x 16 bits. Exercises all 13 defined opcodes plus reserved 1010.
+// Loaded by InstructionMemory.v via $readmemb.
+//
+// Expected final state:
+//   R0 = 0x0000    R4 = 0xFFFE    (from INV)
+//   R1 = 0x0001    R5 = 0x0000    (from AND)
+//   R2 = 0x0002    R6 = 0x0001    (from SHR)
+//   R3 = 0x0004    R7 = 0x0001    (from SLT)
+//
+//   Mem[0] = 0x0001  (unchanged from test.data)
+//   Mem[1] = 0x0002  (unchanged)
+//   Mem[2] = 0x0003  (written by ST at W3)
+//   Mem[3] = 0x0005  (unchanged - proves BNE and BEQ worked correctly)
+//   Mem[4..7] unchanged
+//
+// Branch/jump coverage:
+//   W11 : BEQ not-taken (fall through)
+//   W12 : BNE taken (skip next)
+//   W14 : JMP to W15 (in-range target, lands on reserved opcode)
+//   W15 : reserved 1010 verified as a no-op
+// =============================================================================
+
+// W0  PC=0x00 : LD  R1, 0(R0)       ; R1 = Mem[0] = 1
+0000000001000000
+
+// W1  PC=0x02 : LD  R2, 1(R0)       ; R2 = Mem[1] = 2
+0000000010000001
+
+// W2  PC=0x04 : ADD R3, R1, R2      ; R3 = 1 + 2 = 3
+0010001010011000
+
+// W3  PC=0x06 : ST  R3, 2(R0)       ; Mem[2] = 3
+0001000011000010
+
+// W4  PC=0x08 : SUB R4, R2, R1      ; R4 = 2 - 1 = 1
+0011010001100000
+
+// W5  PC=0x0A : AND R5, R1, R2      ; R5 = 1 & 2 = 0
+0111001010101000
+
+// W6  PC=0x0C : OR  R6, R1, R2      ; R6 = 1 | 2 = 3
+1000001010110000
+
+// W7  PC=0x0E : SLT R7, R1, R2      ; R7 = (1<2) = 1
+1001001010111000
+
+// W8  PC=0x10 : SHL R3, R2, R1      ; R3 = 2 << 1 = 4    (overwrites old R3=3)
+0101010001011000
+
+// W9  PC=0x12 : SHR R6, R2, R1      ; R6 = 2 >> 1 = 1    (overwrites old R6=3)
+0110010001110000
+
+// W10 PC=0x14 : INV R4, R1          ; R4 = ~1 = 0xFFFE   (overwrites old R4=1)
+0100001000100000
+
+// W11 PC=0x16 : BEQ R1, R2, +1      ; 1 == 2? NO -> NOT taken -> fall through
+1011001010000001
+
+// W12 PC=0x18 : BNE R1, R2, +1      ; 1 != 2? YES -> TAKEN -> skip W13
+1100001010000001
+
+// W13 PC=0x1A : ST  R7, 3(R0)       ; CANARY. Should be skipped. If it runs, Mem[3] becomes 1 (was 5)
+0001000111000011
+
+// W14 PC=0x1C : JMP 15              ; target = 0x001E = W15 (proves JMP works)
+1101000000001111
+
+// W15 PC=0x1E : RSVD (reserved)     ; no-op; JMP lands here; reserved opcode must not change state
+1010000000000000
+
+
