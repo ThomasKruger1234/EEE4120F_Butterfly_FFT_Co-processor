@@ -1,5 +1,5 @@
 // =========================================================================
-// Butterfly FFT Co-processor — Building Block: Q1.15 Signed Multiplier
+// Butterfly FFT Co-processor — Building Block: Q10.22 Signed Multiplier
 // =========================================================================
 //
 // GROUP NUMBER: 8
@@ -10,18 +10,23 @@
 //   - Krishnaraj Eswari Niranjan, EWSKRI001
 
 // File        : Multiplier.v
-// Description : 16-bit signed Q1.15 multiplier.
+// Description : 32-bit signed Q10.22 multiplier.
 //               Computes (a * b) where both operands are interpreted as
-//               Q1.15 fixed-point.
+//               Q10.22 fixed-point (10 integer bits including sign,
+//               22 fractional bits; range ~[-512, +512)).
 //
-//               Q1.15 * Q1.15 produces a Q2.30 32-bit full product:
-//                   bit 31    = redundant sign-extension bit
-//                   bit 30    = sign / integer bit of the Q2.30 product
-//                   bits 29:0 = 30 fractional bits
+//               Q10.22 * Q10.22 produces a Q20.44 64-bit full product:
+//                   bits 63:54 = 10 high-order integer bits (sign-extension
+//                                of the result when no overflow occurs)
+//                   bit  53    = sign / top integer bit of the Q10.22 result
+//                   bits 52:44 = remaining 9 integer bits
+//                   bits 43:22 = 22 fractional bits we keep
+//                   bits 21:0  = 22 low fractional bits we truncate
 //
-//               To narrow back to Q1.15 we drop the redundant top bit and
-//               the lower 15 fractional bits, taking bits [30:15].
-//               (No rounding — simple truncation toward negative infinity.)
+//               To narrow back to Q10.22 we take bits [53:22].
+//               (No rounding — simple truncation toward negative infinity.
+//                No saturation — the surrounding system must keep results
+//                within the Q10.22 range.)
 //
 //               This is a purely combinational module
 // =============================================================================
@@ -30,24 +35,26 @@
 `include "../src/Parameter.v"
 
 module Multiplier (
-    input  signed [15:0] a,             // Operand A — Q1.15 signed
-    input  signed [15:0] b,             // Operand B — Q1.15 signed
-    output signed [15:0] result         // a * b reinterpreted as Q1.15 signed
+    input  signed [31:0] a,             // Operand A — Q10.22 signed
+    input  signed [31:0] b,             // Operand B — Q10.22 signed
+    output signed [31:0] result         // a * b reinterpreted as Q10.22 signed
 );
 
     // -------------------------------------------------------------------------
-    // Full 32-bit signed product (Q2.30). Both operands are declared `signed`
+    // Full 64-bit signed product (Q20.44). Both operands are declared `signed`
     // so Verilog uses signed multiplication semantics.
     // -------------------------------------------------------------------------
-    wire signed [31:0] full_product;
+    wire signed [63:0] full_product;
 
     assign full_product = a * b;
 
     // -------------------------------------------------------------------------
-    // Narrow Q2.30 -> Q1.15 by taking bits [30:15].
-    //   bit 31 is dropped (it duplicates bit 30 for all results in [-1, +1)).
-    //   bits 14:0 are dropped (truncated low fractional bits).
+    // Narrow Q20.44 -> Q10.22 by taking bits [53:22].
+    //   bits 63:54 are dropped (they duplicate bit 53 whenever the result
+    //              actually fits in Q10.22; if they differ from bit 53 the
+    //              result has overflowed and the truncation is incorrect).
+    //   bits 21:0  are dropped (truncated low fractional bits).
     // -------------------------------------------------------------------------
-    assign result = full_product[30:15];
+    assign result = full_product[53:22];
 
 endmodule
