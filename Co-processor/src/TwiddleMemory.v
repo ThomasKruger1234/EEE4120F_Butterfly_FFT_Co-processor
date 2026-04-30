@@ -13,12 +13,12 @@
 // Description : Twiddle factor memory for FFT butterfly co-processor.
 //             256 twiddle factors, each 32 bits real + 32 bits imaginary. 
 //             Contents loaded at simulation start from
-//             the binary file ./twiddle.data using $readmemb.
+//             the binary file ./twiddle.data using $readmemh.
 //
 // ===========================================================================
 
 `timescale 1ns / 1ps
-`include "../src/Parameter.v"
+//`include "../src/Parameter.v"
 
 module TwiddleMemory (
     input  [7:0] k,           // Address (0-255)
@@ -56,7 +56,7 @@ module TwiddleMemory (
     //       32 bits representing the imaginary part of the twiddle factor.
     // -------------------------------------------------------------------------
         initial begin
-            $readmemb("../src/twiddle.data", memory, 0, 127);
+            $readmemh("../src/twiddle.data", memory, 0, 127);
         end
     // -------------------------------------------------------------------------
     // Drive the twiddle output with a continuous assignment.
