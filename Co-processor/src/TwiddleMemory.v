@@ -11,66 +11,58 @@
 
 // File        : TwiddleMemory.v
 // Description : Twiddle factor memory for FFT butterfly co-processor.
-//             256 twiddle factors, each 16 bits real + 16 bits imaginary. 
+//             256 twiddle factors, each 32 bits real + 32 bits imaginary. 
 //             Contents loaded at simulation start from
-//             the binary file .//twiddle.data using $readmemb.
+//             the binary file ./twiddle.data using $readmemb.
 //
-// Task 3 — Student Implementation Required
-// =============================================================================
+// ===========================================================================
 
 `timescale 1ns / 1ps
 `include "../src/Parameter.v"
 
-module InstructionMemory (
-    input  [15:0] pc,           // Program Counter (byte address)
-    output [15:0] instruction   // Fetched 16-bit instruction word
+module TwiddleMemory (
+    input  [7:0] k,           // Address (0-255)
+    output [31:0] twiddle_real,    // Fetched 32-bit real twiddle factor
+    output [31:0] twiddle_imag     // Fetched 32-bit imaginary twiddle factor
 );
 
     // -------------------------------------------------------------------------
-    // TODO: Declare the instruction memory array.
-    //       It should hold `ROW_I entries, each `COL bits wide.
-    //
-    //       reg [`COL-1:0] memory [`ROW_I-1:0];
+    // Declare the twiddle factor memory array.
+    //       It should hold 128 entries, each 64 bits wide.
+    //       Each entry will store one twiddle factor: the upper 32 bits for the
+    //       real part and the lower 32 bits for the imaginary part.
     // -------------------------------------------------------------------------
-    reg[`COL-1:0] memory [`ROW_I-1:0];
+    reg[63:0] memory [127:0];
 
     // -------------------------------------------------------------------------
-    // TODO: Derive the word address from the byte-addressed PC.
+    // Derive the word address from the twiddle-step counter K.
     //
-    //       Because each instruction is 16 bits (2 bytes) wide, and the PC
-    //       increments by 2 each cycle, the word index into the ROM is:
-    //
-    //           wire [3:0] rom_addr = pc[4:1];
-    //
-    //       This discards the byte-select bit (pc[0], always 0 for aligned
-    //       accesses) and maps the byte address to a word index:
     //           PC=0x0000 -> rom_addr=0
-    //           PC=0x0002 -> rom_addr=1
-    //           PC=0x0004 -> rom_addr=2   ... and so on.
+    //           PC=0x0001 -> rom_addr=1
+    //           PC=0x0002 -> rom_addr=2   ... and so on.
+    //      Then wrap-around because twiddle factor is symmetrical
+    //           PC=0x0080 -> rom_addr=0
+    //           PC=0x0081 -> rom_addr=1
+    //           PC=0x0082 -> rom_addr=2   ... and so on.
     // -------------------------------------------------------------------------
-    wire [3:0] rom_addr = pc[4:1];
+    wire [6:0] twiddle_addr = k[6:0];
 
     // -------------------------------------------------------------------------
-    // TODO: Load the instruction memory contents from file at simulation start.
-    //       The file ./test/test.prog must contain one 16-bit binary value
-    //       per line (e.g. 0010000001010000).
-    //
-    //       initial begin
-    //           $readmemb("./test/test.prog", memory, 0, 14);
-    //       end
-    //
-    //       Note: the third and fourth arguments (0, 14) specify the start and
-    //       end indices in the array to fill. Adjust if your program is longer.
+    // Load the twiddle factor memory contents from file at simulation start.
+    //       The file ./src/twiddle.data must contain one 32-bit binary value
+    //       per line (e.g. 00000000010100000010000001010000).
+    //       The first 128 lines will be loaded into the memory array, with the
+    //       upper 32 bits of each entry representing the real part and the lower
+    //       32 bits representing the imaginary part of the twiddle factor.
     // -------------------------------------------------------------------------
         initial begin
-            $readmemb("../test/test.prog",memory, 0, 15);
+            $readmemb("../src/twiddle.data", memory, 0, 127);
         end
     // -------------------------------------------------------------------------
-    // TODO: Drive the instruction output with a continuous assignment.
-    //       The output must update combinationally whenever rom_addr changes.
-    //
-    //       assign instruction = memory[rom_addr];
+    // Drive the twiddle output with a continuous assignment.
+    // The output must update combinationally whenever twiddle_addr changes.
     // -------------------------------------------------------------------------
-    assign instruction = memory[rom_addr];
+    assign twiddle_real = memory[twiddle_addr][63:32];
+    assign twiddle_imag = memory[twiddle_addr][31:0];
 
 endmodule
