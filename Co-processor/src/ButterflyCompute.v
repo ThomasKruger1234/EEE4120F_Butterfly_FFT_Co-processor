@@ -51,13 +51,14 @@
 `ifndef BUTTERFLY_COMPUTE_V
 `define BUTTERFLY_COMPUTE_V
 
-`timescale 1ns / 1ps
-
 //`include "../src/Parameter.v"
 
 `include "Multiplier.v"
 `include "Subtractor.v"
 `include "Adder.v"
+
+
+`timescale 1ns / 1ps
 
 module ButterflyCompute (
     // -------------------------------------------------------------------------

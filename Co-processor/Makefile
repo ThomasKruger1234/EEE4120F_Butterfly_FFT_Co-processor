@@ -8,6 +8,11 @@ butterflymem:
 	./build/butterflymemory_sim
 	gtkwave waves/ButterflyMemory_test.vcd
 
+butterflycompute:
+	iverilog -Wall -I src/ -o build/butterflycompute_sim src/ButterflyCompute.v tb/ButterflyCompute_tb.v
+	./build/butterflycompute_sim
+	gtkwave waves/butterflycompute_tb.vcd
+
 butterflyctr:
 	iverilog -Wall -I src/ -o build/butterflycontroller_sim src/ButterflyController.v tb/ButterflyController_tb.v
 	./build/butterflycontroller_sim

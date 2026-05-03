@@ -23,7 +23,7 @@
 `timescale 1ns / 1ps
 
 `include "../src/TwiddleMemory.v"
-`include "../src/ButterflyDatapath.v"
+`include "../src/ButterflyCompute.v"
 
 module ButterflyMemory_tb();
 
@@ -60,7 +60,7 @@ module ButterflyMemory_tb();
     );
 
     // --- 3. Instantiate Butterfly Datapath ---
-    ButterflyDatapath DU (
+    ButterflyCompute DU (
         .a_real(mem_out_a_r), .a_imag(mem_out_a_i),
         .b_real(mem_out_b_r), .b_imag(mem_out_b_i),
         .w_real(twiddle_r),   .w_imag(twiddle_i),
