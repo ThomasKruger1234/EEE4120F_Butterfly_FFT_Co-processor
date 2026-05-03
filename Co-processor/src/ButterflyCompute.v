@@ -10,7 +10,7 @@
 //   - Krishnaraj Eswari Niranjan, EWSKRI001
 
 
-// File        : ButterflyDatapath.v
+// File        : ButterflyCompute.v
 // Description : Butterfly compute datapath.
 //               Takes two complex inputs A, B and a complex twiddle factor W
 //               and produces the two complex butterfly outputs:
@@ -48,8 +48,8 @@
 //                     B_imag = a_imag - wb_imag
 // =============================================================================
 
-`ifndef BUTTERFLY_DATAPATH_V
-`define BUTTERFLY_DATAPATH_V
+`ifndef BUTTERFLY_COMPUTE_V
+`define BUTTERFLY_COMPUTE_V
 
 `timescale 1ns / 1ps
 
@@ -59,7 +59,7 @@
 `include "Subtractor.v"
 `include "Adder.v"
 
-module ButterflyDatapath (
+module ButterflyCompute (
     // -------------------------------------------------------------------------
     // Operand A (complex) — Q10.22 signed
     // -------------------------------------------------------------------------
