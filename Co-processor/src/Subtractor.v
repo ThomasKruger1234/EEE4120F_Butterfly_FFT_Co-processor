@@ -27,8 +27,11 @@
 //               This is a purely combinational module — no clock, no state.
 // =============================================================================
 
+`ifndef SUBTRACTOR_V
+`define SUBTRACTOR_V
+
 `timescale 1ns / 1ps
-`include "../src/Parameter.v"
+//`include "../src/Parameter.v"
 
 module Subtractor (
     input  signed [31:0] a,             // Operand A — Q10.22 signed
@@ -39,3 +42,5 @@ module Subtractor (
     assign result = a - b;
 
 endmodule
+
+`endif

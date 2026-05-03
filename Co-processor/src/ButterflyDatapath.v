@@ -48,8 +48,16 @@
 //                     B_imag = a_imag - wb_imag
 // =============================================================================
 
+`ifndef BUTTERFLY_DATAPATH_V
+`define BUTTERFLY_DATAPATH_V
+
 `timescale 1ns / 1ps
-`include "../src/Parameter.v"
+
+//`include "../src/Parameter.v"
+
+`include "Multiplier.v"
+`include "Subtractor.v"
+`include "Adder.v"
 
 module ButterflyDatapath (
     // -------------------------------------------------------------------------
@@ -175,3 +183,5 @@ module ButterflyDatapath (
     );
 
 endmodule
+
+`endif
