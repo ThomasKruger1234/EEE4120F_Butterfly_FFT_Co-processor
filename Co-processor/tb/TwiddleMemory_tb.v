@@ -18,7 +18,7 @@
 //   cd ../tb
 //   iverilog -Wall -I ../src -o ../build/twiddle_sim ../src/TwiddleMemory.v TwiddleMemory_tb.v
 //   cd ../test && ../build/twiddle_sim
-//   gtkwave ../waves/twiddle_tb.vcd &
+//   gtkwave waves/twiddle_tb.vcd &
 // ===========================================================================
 
 `timescale 1ns / 1ps
@@ -37,7 +37,7 @@ module TwiddleMemory_tb;
     );
 
     initial begin
-        $dumpfile("../waves/twiddle_tb.vcd");
+        $dumpfile("waves/twiddle_tb.vcd");
         $dumpvars(0, TwiddleMemory_tb);
     end
 
