@@ -5,10 +5,8 @@ A dedicated FPGA hardware unit that performs Butterfly operations for FFTs. It c
 
 A Discrete Fourier Transform is a mathematical tool that converts signals from the time domain (how the signal changes over time) into the frequency domain (what frequencies it contains).
 
-The standard formula for a DFT of sequence $x[n]$, with a total of $N$ samples, is:
-$$
-X[k]=\sum_{n=0}^{N-1}x[n]\cdot e^{-j\frac{2\pi}{N}nk}
-$$
+The standard formula for a DFT of sequence $x[n]$, with a total of $N$ samples, is:  
+$X[k]=\sum_{n=0}^{N-1}x[n]\cdot e^{-j\frac{2\pi}{N}nk}$
 
 ## Algorithm
 A Fast Fourier Transform (FFT) is an efficient way to compute the DFT. There are many FFT algorithms that are optimized for particular input and processing characteristics.
