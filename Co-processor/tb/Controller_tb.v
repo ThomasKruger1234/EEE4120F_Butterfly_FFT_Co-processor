@@ -24,21 +24,13 @@
 
 module Controller_tb;
 
-    // -------------------------------------------------------------------------
-    // Speed-up: override DUMMY_CYCLES to 10 cycles instead of 100 000.
-    // The DUT is instantiated with a defparam so we don't touch the source.
-    // -------------------------------------------------------------------------
-    localparam FAST_DUMMY = 32'd10;
-
-    // -------------------------------------------------------------------------
-    // Clock: 10 ns period (100 MHz)
-    // -------------------------------------------------------------------------
-    localparam CLK_PERIOD = 10;
-
     reg clk, rst;
     wire [6:0] iteration;
     wire [2:0] stage;
     wire       done;
+	reg        we;
+	wire [7:0] addr_a;
+	wire [7:0] addr_b;
 
     // -------------------------------------------------------------------------
     // DUT instantiation
@@ -46,17 +38,18 @@ module Controller_tb;
     Controller uut (
         .clk       (clk),
         .rst       (rst),
+		.we		   (we),
         .iteration (iteration),
         .stage     (stage),
-        .done      (done)
+        .done      (done),
+		.addr_a    (addr_a),
+		.addr_b	   (addr_b)
     );
-
-    // Override the dummy cycle count for simulation speed
-    defparam uut.DUMMY_CYCLES = FAST_DUMMY;
 
     // -------------------------------------------------------------------------
     // Clock generation
     // -------------------------------------------------------------------------
+	localparam CLK_PERIOD = 10;
     initial clk = 0;
     always #(CLK_PERIOD / 2) clk = ~clk;
 
@@ -85,13 +78,14 @@ module Controller_tb;
     endtask
 
     // Advance exactly one full iteration step.
-    // S_ACTION holds for FAST_DUMMY cycles (timer counts 0 to FAST_DUMMY-1),
-    // then transitions to S_UPDATE on the next posedge where outputs are latched.
     task step;
-        begin
-            repeat (FAST_DUMMY + 1) @(posedge clk);
-        end
-    endtask
+		begin
+			@(posedge clk); #1;
+			we = 1;
+			@(posedge clk); #1;
+			we = 0;
+		end
+	endtask 
 
     // -------------------------------------------------------------------------
     // Stimulus
@@ -105,6 +99,7 @@ module Controller_tb;
         // ----------------------------------------------------------------
         // TEST 1: Reset behaviour
         // ----------------------------------------------------------------
+		we = 0;
         rst = 1;
         @(posedge clk); #1;
         check(7'd0, 3'd0, 1'b0, "RST    ");
@@ -130,8 +125,6 @@ module Controller_tb;
         // ----------------------------------------------------------------
         // TEST 4: Run through all remaining stages automatically,
         //         watching for the done pulse at stage=7 / iter=127.
-        //         Each step() lands on the freshly-latched S_UPDATE output,
-        //         so 128 steps advances one full stage (0→127→wrap).
         // ----------------------------------------------------------------
 
         // Finish stages 1 through 6 (128 steps each)
@@ -141,9 +134,7 @@ module Controller_tb;
         // Now at stage=7, iter=0
         #1; check(7'd0, 3'd7, 1'b0, "STG7 ST");
 
-        // 127 more steps reaches iter=126. The final step() runs 11 posedges:
-        // 10 for S_ACTION then 1 more which is S_UPDATE — after which the FSM
-        // immediately moves to S_ACTION with done=1 visible. Sample right after.
+        // 127 more steps reaches iter=126. The final step() runs 11 posedges
         repeat (127) step;
         step; #1;
         check(7'd127, 3'd7, 1'b1, "DONE   ");

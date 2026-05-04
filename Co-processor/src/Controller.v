@@ -23,11 +23,14 @@
 `timescale 1ns / 1ps
 
 module Controller (
-    input  wire clk,          // System clock
-    input  wire rst,          // Synchronous active-high reset
-    output reg  [6:0] iteration,  // Current iteration (0–127)
-    output reg  [2:0] stage,      // Current stage     (0–7)
-    output reg  done              // Pulses high when stage=7, iteration=127
+    input  wire clk,          		// System clock
+    input  wire rst,          		// Synchronous active-high reset
+	input  wire we,					// Write-enable pulse from memory controller
+    output reg  [6:0] iteration,  	// Current iteration (0–127)
+    output reg  [2:0] stage,      	// Current stage     (0–7)
+    output reg  done,              	// Pulses high when stage=7, iteration=127
+	output wire [7:0] addr_a,
+	output wire [7:0] addr_b
 );
 
     // -------------------------------------------------------------------------
@@ -37,83 +40,45 @@ module Controller (
     localparam MAX_STAGE = 3'd7;
 
     // -------------------------------------------------------------------------
-    // Dummy-action timer.
-    //   With `timescale 1ns/1ps, 1 ms = 1_000_000 ns.
-    //   The counter counts clock cycles; set DUMMY_CYCLES to match your
-    //   actual clock frequency, or leave as-is for simulation.
-    //
-    //   Example: 100 MHz clock → 100_000 cycles per ms
-    //   For pure simulation the exact value doesn't matter.
-    // -------------------------------------------------------------------------
-    parameter  DUMMY_CYCLES = 32'd100_000;  // 1 ms @ 100 MHz (overridable for simulation)
-
-    reg [31:0] timer;
-    reg        timer_done;
-
-    // -------------------------------------------------------------------------
-    // State machine
-    // -------------------------------------------------------------------------
-    localparam S_ACTION = 1'b0;   // Performing the dummy 1ms action
-    localparam S_UPDATE = 1'b1;   // Updating iteration / stage counters
-
-    reg state;
-
-    // -------------------------------------------------------------------------
     // Sequential logic
     // -------------------------------------------------------------------------
-    always @(posedge clk) begin
-        if (rst) begin
-            iteration  <= 7'd0;
-            stage      <= 3'd0;
-            timer      <= 32'd0;
-            timer_done <= 1'b0;
-            done       <= 1'b0;
-            state      <= S_ACTION;
-        end else begin
-            done <= 1'b0;  // Default: de-assert each cycle
+	always @(posedge clk) begin
+		if (rst) begin
+			iteration <= 7'd0;
+			stage     <= 3'd0;
+			done      <= 1'b0;
+		end else begin
+			done <= 1'b0;
 
-            case (state)
+			if (we) begin
+				if (stage == MAX_STAGE && iteration == MAX_ITER) begin
+					done <= 1'b1;
+				end else if (iteration == MAX_ITER) begin
+					iteration <= 7'd0;
+					stage     <= stage + 1;
+				end else begin
+					iteration <= iteration + 1;
+				end
+			end
+		end
+	end
 
-                // ---------------------------------------------------------
-                // S_ACTION : wait for 1 ms (dummy work per iteration step)
-                // ---------------------------------------------------------
-                S_ACTION: begin
-                    if (timer < DUMMY_CYCLES - 1) begin
-                        timer <= timer + 1;
-                    end else begin
-                        timer      <= 32'd0;
-                        timer_done <= 1'b1;
-                        state      <= S_UPDATE;
-                    end
-                end
-
-                // ---------------------------------------------------------
-                // S_UPDATE : advance iteration, then stage if needed
-                // ---------------------------------------------------------
-                S_UPDATE: begin
-                    timer_done <= 1'b0;
-
-                    if (stage == MAX_STAGE && iteration == MAX_ITER) begin
-                        // All stages and iterations complete
-                        done  <= 1'b1;
-                        state <= S_ACTION;  // Halt here (or reset externally)
-                    end else if (iteration == MAX_ITER) begin
-                        // End of an iteration sweep → advance stage
-                        iteration <= 7'd0;
-                        stage     <= stage + 1;
-                        state     <= S_ACTION;
-                    end else begin
-                        // Normal iteration increment
-                        iteration <= iteration + 1;
-                        state     <= S_ACTION;
-                    end
-                end
-
-                default: state <= S_ACTION;
-
-            endcase
-        end
-    end
+    // -------------------------------------------------------------------------
+    // Combinational logic
+	// Assignment with bit reversal
+    // -------------------------------------------------------------------------
+	
+	// Values to reverse
+	wire [7:0] addr_a_rev = {1'b0, iteration} + 8'd0 + {6'b0, iteration[1:0]};
+	wire [7:0] addr_b_rev = {1'b0, iteration} + 8'd1 + {6'b0, iteration[1:0]};
+	
+	genvar i;
+	generate
+		for (i = 0; i < 8; i = i + 1) begin
+			assign addr_a[i] = addr_a_rev[7-i];
+			assign addr_b[i] = addr_b_rev[7-i];
+		end
+	endgenerate
 
 endmodule
 
