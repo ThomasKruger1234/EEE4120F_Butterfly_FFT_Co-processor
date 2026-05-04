@@ -14,7 +14,7 @@ butterflycompute:
 	gtkwave waves/butterflycompute_tb.vcd
 
 butterflyctr:
-	iverilog -Wall -I src/ -o build/butterflycontroller_sim src/ButterflyController.v tb/ButterflyController_tb.v
-	./build/butterflycontroller_sim
-	gtkwave waves/ButterflyController_test.vcd
+	iverilog -Wall -I src/ -o build/controller_sim src/Controller.v tb/Controller_tb.v
+	./build/controller_sim
+	gtkwave waves/Controller_tb.vcd
 
