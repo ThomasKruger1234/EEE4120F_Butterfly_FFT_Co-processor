@@ -18,3 +18,9 @@ butterflyctr:
 	./build/controller_sim
 	gtkwave waves/Controller_tb.vcd
 
+fft:
+	iverilog -Wall -I src/ -o build/fft_sim \
+	    src/Controller.v src/ButterflyMemory.v src/ButterflyCompute.v \
+	    src/TwiddleMemory.v src/Adder.v src/Subtractor.v src/Multiplier.v \
+	    src/FFT_Coprocessor.v
+

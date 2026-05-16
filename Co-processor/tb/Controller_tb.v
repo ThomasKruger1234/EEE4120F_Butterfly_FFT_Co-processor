@@ -28,7 +28,7 @@ module Controller_tb;
     wire [6:0] iteration;
     wire [2:0] stage;
     wire       done;
-	reg        we;
+	reg        advance;
 	wire [7:0] addr_a;
 	wire [7:0] addr_b;
 
@@ -38,7 +38,7 @@ module Controller_tb;
     Controller uut (
         .clk       (clk),
         .rst       (rst),
-		.we		   (we),
+		.advance   (advance),
         .iteration (iteration),
         .stage     (stage),
         .done      (done),
@@ -97,11 +97,11 @@ module Controller_tb;
     task step;
 		begin
 			@(posedge clk); #1;
-			we = 1;
+			advance = 1;
 			@(posedge clk); #1;
-			we = 0;
+			advance = 0;
 		end
-	endtask 
+	endtask
 
     // -------------------------------------------------------------------------
     // Stimulus
@@ -115,7 +115,7 @@ module Controller_tb;
         // ----------------------------------------------------------------
         // TEST 1: Reset behaviour
         // ----------------------------------------------------------------
-		we = 0;
+		advance = 0;
         rst = 1;
         @(posedge clk); #1;
         check(7'd0, 3'd0, 1'b0, "RST    ");

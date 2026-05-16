@@ -14,7 +14,8 @@
 //               Counts iteration from 0 to 127, then increments stage (0 to 7).
 //               A 1ms dummy action delay separates each iteration step.
 //               Asserts 'done' when stage == 7 and iteration == 127.
-//
+//               Outputs addr_a, addr_b and twiddle_addr depending on iteration and stage
+//               to be used in Butterfly computation
 // ===========================================================================
 
 `ifndef CONTROLLER_V
@@ -25,7 +26,7 @@
 module Controller (
     input  wire clk,          		// System clock
     input  wire rst,          		// Synchronous active-high reset
-	input  wire we,					// Write-enable pulse from memory controller
+	input  wire advance,			// Tick pulse: commits the current butterfly and advances iteration
     output reg  [6:0] iteration,  	// Current iteration (0–127)
     output reg  [2:0] stage,      	// Current stage     (0–7)
     output reg  done,              	// Pulses high when stage=7, iteration=127
@@ -51,7 +52,7 @@ module Controller (
 		end else begin
 			done <= 1'b0;
 
-			if (we) begin
+			if (advance) begin
 				if (stage == MAX_STAGE && iteration == MAX_ITER) begin
 					done <= 1'b1;
 				end else if (iteration == MAX_ITER) begin
