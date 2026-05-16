@@ -77,6 +77,22 @@ module Controller_tb;
         end
     endtask
 
+    task check_addr;
+        input [7:0]  exp_a;
+        input [7:0]  exp_b;
+        input [63:0] label;
+        begin
+            if (addr_a !== exp_a || addr_b !== exp_b) begin
+                $display("FAIL [%0t] %s  got addr_a=%0d addr_b=%0d  expected addr_a=%0d addr_b=%0d",
+                         $time, label, addr_a, addr_b, exp_a, exp_b);
+                errors = errors + 1;
+            end else begin
+                $display("PASS [%0t] %s  addr_a=%0d addr_b=%0d",
+                         $time, label, addr_a, addr_b);
+            end
+        end
+    endtask
+
     // Advance exactly one full iteration step.
     task step;
 		begin
@@ -103,16 +119,18 @@ module Controller_tb;
         rst = 1;
         @(posedge clk); #1;
         check(7'd0, 3'd0, 1'b0, "RST    ");
+        check_addr(8'd0, 8'd1, "ADR RST");
 
         rst = 0;
         @(posedge clk); #1;
 
         // ----------------------------------------------------------------
         // TEST 2: First few iterations increment correctly (stage stays 0)
+        //         Stage-0 pairs: (0,1), (2,3), (4,5), (6,7), …
         // ----------------------------------------------------------------
-        step; #1; check(7'd1, 3'd0, 1'b0, "ITER 1 ");
-        step; #1; check(7'd2, 3'd0, 1'b0, "ITER 2 ");
-        step; #1; check(7'd3, 3'd0, 1'b0, "ITER 3 ");
+        step; #1; check(7'd1, 3'd0, 1'b0, "ITER 1 "); check_addr(8'd2, 8'd3, "ADRS0_1");
+        step; #1; check(7'd2, 3'd0, 1'b0, "ITER 2 "); check_addr(8'd4, 8'd5, "ADRS0_2");
+        step; #1; check(7'd3, 3'd0, 1'b0, "ITER 3 "); check_addr(8'd6, 8'd7, "ADRS0_3");
 
         // ----------------------------------------------------------------
         // TEST 3: Run to iter==127 → stage increments, iter wraps to 0.
@@ -121,23 +139,36 @@ module Controller_tb;
         // ----------------------------------------------------------------
         repeat (125) step;
         #1; check(7'd0, 3'd1, 1'b0, "WRAP S1");
+        check_addr(8'd0, 8'd2, "ADRS1_0");
+
+        // Verify stage-1 pair pattern: (0,2), (1,3), (4,6), (5,7)
+        step; #1; check_addr(8'd1, 8'd3, "ADRS1_1");
+        step; #1; check_addr(8'd4, 8'd6, "ADRS1_2");
+        step; #1; check_addr(8'd5, 8'd7, "ADRS1_3");
 
         // ----------------------------------------------------------------
         // TEST 4: Run through all remaining stages automatically,
         //         watching for the done pulse at stage=7 / iter=127.
         // ----------------------------------------------------------------
 
-        // Finish stages 1 through 6 (128 steps each)
-        repeat (6) begin
+        // Finish stage 1 (125 more steps to reach iter=128 → wrap to stage 2)
+        repeat (125) step;
+        // Finish stages 2 through 6 (128 steps each)
+        repeat (5) begin
             repeat (128) step;
         end
         // Now at stage=7, iter=0
         #1; check(7'd0, 3'd7, 1'b0, "STG7 ST");
+        check_addr(8'd0, 8'd128, "ADRS7_0");
 
-        // 127 more steps reaches iter=126. The final step() runs 11 posedges
-        repeat (127) step;
+        // Verify stage-7 pair pattern: addr_b = addr_a + 128
+        step; #1; check_addr(8'd1, 8'd129, "ADRS7_1");
+
+        // 126 more steps reaches iter=127. The final step() asserts done.
+        repeat (126) step;
         step; #1;
         check(7'd127, 3'd7, 1'b1, "DONE   ");
+        check_addr(8'd127, 8'd255, "ADRS7_E");
 
         // ----------------------------------------------------------------
         // TEST 5: done de-asserts on the next clock (only a 1-cycle pulse)
