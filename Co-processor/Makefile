@@ -24,3 +24,11 @@ fft:
 	    src/TwiddleMemory.v src/Adder.v src/Subtractor.v src/Multiplier.v \
 	    src/FFT_Coprocessor.v
 
+fftcoproc:
+	iverilog -Wall -I src/ -o build/fft_coprocessor_sim \
+	    src/Controller.v src/ButterflyMemory.v src/ButterflyCompute.v \
+	    src/TwiddleMemory.v src/Adder.v src/Subtractor.v src/Multiplier.v \
+	    src/FFT_Coprocessor.v tb/FFT_Coprocessor_tb.v
+	./build/fft_coprocessor_sim
+	gtkwave waves/FFT_Coprocessor_tb.vcd
+
