@@ -30,7 +30,7 @@ SRC = src/Parameter.v \
       src/Datapath.v \
       src/StarCore1.v
 
-.PHONY: all alu gpr imem dmem aluctrl ctrl integration soc waves clean
+.PHONY: all alu gpr imem dmem aluctrl ctrl integration soc soc_run waves clean
 
 # All FFT coprocessor source files (used by the `soc` target)
 FFT_SRC = ../Co-processor/src/Adder.v \
@@ -131,6 +131,19 @@ soc: build/soc_sim
 build/soc_sim: $(SRC) src/SoC.v $(FFT_SRC) | build
 	iverilog $(IVFLAGS) -I ../Co-processor/src/ -o build/soc_sim \
 		-s SoC $(SRC) src/SoC.v $(FFT_SRC)
+
+# ---------------------------------------------------------------------------
+# SoC integration testbench — full CPU + SoC + FFT path with runtime
+# in-place bit-reversal (SoC's S_SWAP phase). Stimulus loaded from
+# Golden-Measures/input_sequential.mem in natural order.
+# ---------------------------------------------------------------------------
+soc_run: build/soc_run_sim
+	@echo "--- Running SoC integration testbench ---"
+	cd test && ../build/soc_run_sim
+
+build/soc_run_sim: $(SRC) src/SoC.v $(FFT_SRC) tb/SoC_tb.v | build
+	iverilog $(IVFLAGS) -I ../Co-processor/src/ -o build/soc_run_sim \
+		-s SoC_tb $(SRC) src/SoC.v $(FFT_SRC) tb/SoC_tb.v
 
 # ---------------------------------------------------------------------------
 # Open the integration waveform in GTKWave

@@ -1,0 +1,11 @@
+// =============================================================================
+// fft_test.prog - SoC integration program: trigger FFT, then halt-to-self.
+// 16 words x 16 bits. Loaded by InstructionMemory via $readmemb when the
+// SoC_tb overrides InstructionMemory.PROG_FILE.
+// =============================================================================
+
+// W0  PC=0x00 : FFT_RUN              ; opcode 1010 -> SoC FSM: IDLE->SWAP->RUN->DONE
+1010000000000000
+
+// W1  PC=0x02 : JMP 1                ; target = PC 0x0002 (self). Infinite loop.
+1101000000000001

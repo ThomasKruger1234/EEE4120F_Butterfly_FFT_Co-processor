@@ -23,7 +23,9 @@
 `timescale 1ns / 1ps
 //`include "../src/Parameter.v"
 
-module TwiddleMemory (
+module TwiddleMemory #(
+    parameter TWIDDLE_FILE = "../Co-processor/src/twiddle.data"
+) (
     input  [7:0] k,           // Address (0-255)
     output [31:0] twiddle_real,    // Fetched 32-bit real twiddle factor
     output [31:0] twiddle_imag     // Fetched 32-bit imaginary twiddle factor
@@ -59,7 +61,7 @@ module TwiddleMemory (
     //       32 bits representing the imaginary part of the twiddle factor.
     // -------------------------------------------------------------------------
         initial begin
-            $readmemh("../Co-processor/src/twiddle.data", memory, 0, 127);
+            $readmemh(TWIDDLE_FILE, memory, 0, 127);
         end
     // -------------------------------------------------------------------------
     // Drive the twiddle output with a continuous assignment.

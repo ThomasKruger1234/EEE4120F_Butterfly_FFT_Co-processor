@@ -21,7 +21,9 @@
 `timescale 1ns / 1ps
 `include "../src/Parameter.v"
 
-module InstructionMemory (
+module InstructionMemory #(
+    parameter PROG_FILE = "../test/test.prog"
+) (
     input  [15:0] pc,           // Program Counter (byte address)
     output [15:0] instruction   // Fetched 16-bit instruction word
 );
@@ -63,7 +65,7 @@ module InstructionMemory (
     //       end indices in the array to fill. Adjust if your program is longer.
     // -------------------------------------------------------------------------
         initial begin
-            $readmemb("../test/test.prog",memory, 0, 15);
+            $readmemb(PROG_FILE, memory, 0, 15);
         end
     // -------------------------------------------------------------------------
     // TODO: Drive the instruction output with a continuous assignment.

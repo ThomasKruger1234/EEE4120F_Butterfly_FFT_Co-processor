@@ -81,8 +81,13 @@ module FFT_Coprocessor (
         else if (ctrl_done) done_latch <= 1'b1;
     end
 
-    assign done        = done_latch;
-    assign advance = ~done_latch & ~rst;
+    assign done    = done_latch;
+    // Gate advance with ctrl_done so the controller halts on the same edge
+    // that the final butterfly's result commits. Without the ctrl_done term,
+    // there is a one-cycle gap where done_latch is still 0 while iter/stage
+    // sit at (7,127), allowing the final butterfly (addrs 127/255) to fire a
+    // second time on its own outputs and corrupt those bins.
+    assign advance = ~done_latch & ~ctrl_done & ~rst;
 
     // -------------------------------------------------------------------------
     // Controller — emits addresses and the twiddle index per cycle

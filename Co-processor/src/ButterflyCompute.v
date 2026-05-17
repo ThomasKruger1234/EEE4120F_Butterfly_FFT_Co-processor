@@ -41,11 +41,17 @@
 //                     wb_real = wb_pp1 - wb_pp2
 //                     wb_imag = wb_pp3 + wb_pp4
 //
-//                 Layer 3 — form A +/- (W * B):
-//                     A_real = a_real + wb_real
-//                     A_imag = a_imag + wb_imag
-//                     B_real = a_real - wb_real
-//                     B_imag = a_imag - wb_imag
+//                 Layer 3 — form A +/- (W * B), then divide by 2:
+//                     A_real = (a_real + wb_real) >>> 1
+//                     A_imag = (a_imag + wb_imag) >>> 1
+//                     B_real = (a_real - wb_real) >>> 1
+//                     B_imag = (a_imag - wb_imag) >>> 1
+//
+//               The trailing `>>> 1` is per-stage scaling. Across 8 stages it
+//               divides the final spectrum by 2^8 = 256 = 1/N, matching the
+//               normalisation used by the Python golden in fft_fixed.py and
+//               guaranteeing that stage outputs never leave the Q10.22 range
+//               for unit-magnitude inputs.
 // =============================================================================
 
 `ifndef BUTTERFLY_COMPUTE_V
@@ -103,6 +109,12 @@ module ButterflyCompute (
     // --- Layer 2: complex product W * B --------------------------------------
     wire signed [31:0] wb_real;         // wb_pp1 - wb_pp2
     wire signed [31:0] wb_imag;         // wb_pp3 + wb_pp4
+
+    // --- Layer 3: unscaled butterfly outputs (pre `>>> 1`) -------------------
+    wire signed [31:0] A_real_full;     // a_real + wb_real
+    wire signed [31:0] A_imag_full;     // a_imag + wb_imag
+    wire signed [31:0] B_real_full;     // a_real - wb_real
+    wire signed [31:0] B_imag_full;     // a_imag - wb_imag
 
 
     // =========================================================================
@@ -162,26 +174,35 @@ module ButterflyCompute (
     Adder add_A_real (
         .a      (a_real),
         .b      (wb_real),
-        .result (A_real)
+        .result (A_real_full)
     );
 
     Adder add_A_imag (
         .a      (a_imag),
         .b      (wb_imag),
-        .result (A_imag)
+        .result (A_imag_full)
     );
 
     Subtractor sub_B_real (
         .a      (a_real),
         .b      (wb_real),
-        .result (B_real)
+        .result (B_real_full)
     );
 
     Subtractor sub_B_imag (
         .a      (a_imag),
         .b      (wb_imag),
-        .result (B_imag)
+        .result (B_imag_full)
     );
+
+    // =========================================================================
+    // PER-STAGE SCALING — arithmetic right shift by 1 on every butterfly
+    // output. Eight stages * (>>> 1) = total divide by 256 = 1/N.
+    // =========================================================================
+    assign A_real = A_real_full >>> 1;
+    assign A_imag = A_imag_full >>> 1;
+    assign B_real = B_real_full >>> 1;
+    assign B_imag = B_imag_full >>> 1;
 
 endmodule
 
