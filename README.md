@@ -65,8 +65,9 @@ This structure is efficient because one multiplication is used to get two differ
 
 # Implementation
 
-The accelerator is divided into distinct modules. These modules - along with surrounding dependencies - are shown in the high level block diagram.
-![block diagram](diagrams/block-diagram.png)
+The accelerator is divided into distinct modules. These modules - along with surrounding dependencies - are shown in the high level block diagram.  
+
+<img src="diagrams/block-diagram.png" width="500" />
 
 The architecture diagram below focuses on how modules are connected and specified the inputs/outputs of each of these units.
 ![architecture diagram](diagrams/architecture-diagram.png)
