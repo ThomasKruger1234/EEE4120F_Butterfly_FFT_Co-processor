@@ -17,6 +17,9 @@
 //
 // ===========================================================================
 
+`ifndef TWIDDLE_MEMORY_V
+`define TWIDDLE_MEMORY_V
+
 `timescale 1ns / 1ps
 //`include "../src/Parameter.v"
 
@@ -56,7 +59,7 @@ module TwiddleMemory (
     //       32 bits representing the imaginary part of the twiddle factor.
     // -------------------------------------------------------------------------
         initial begin
-            $readmemh("../src/twiddle.data", memory, 0, 127);
+            $readmemh("src/twiddle.data", memory, 0, 127);
         end
     // -------------------------------------------------------------------------
     // Drive the twiddle output with a continuous assignment.
@@ -66,3 +69,5 @@ module TwiddleMemory (
     assign twiddle_imag = memory[twiddle_addr][31:0];
 
 endmodule
+
+`endif

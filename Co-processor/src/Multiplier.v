@@ -31,8 +31,11 @@
 //               This is a purely combinational module
 // =============================================================================
 
+`ifndef MULTIPLIER_V
+`define MULTIPLIER_V
+
 `timescale 1ns / 1ps
-`include "../src/Parameter.v"
+//`include "../src/Parameter.v"
 
 module Multiplier (
     input  signed [31:0] a,             // Operand A — Q10.22 signed
@@ -58,3 +61,5 @@ module Multiplier (
     assign result = full_product[53:22];
 
 endmodule
+
+`endif

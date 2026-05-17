@@ -27,8 +27,9 @@
 //               This is a purely combinational module
 // =============================================================================
 
+`ifndef ADDER_V
+`define ADDER_V
 `timescale 1ns / 1ps
-`include "../src/Parameter.v"
 
 module Adder (
     input  signed [31:0] a,             // Operand A — Q10.22 signed
@@ -39,3 +40,4 @@ module Adder (
     assign result = a + b;
 
 endmodule
+`endif

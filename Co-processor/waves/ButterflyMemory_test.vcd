@@ -1,0 +1,254 @@
+$date
+	Sun May  3 05:28:16 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module ButterflyMemory_tb $end
+$var wire 32 ! twiddle_r [31:0] $end
+$var wire 32 " twiddle_i [31:0] $end
+$var wire 32 # result_b_r [31:0] $end
+$var wire 32 $ result_b_i [31:0] $end
+$var wire 32 % result_a_r [31:0] $end
+$var wire 32 & result_a_i [31:0] $end
+$var wire 32 ' mem_out_b_r [31:0] $end
+$var wire 32 ( mem_out_b_i [31:0] $end
+$var wire 32 ) mem_out_a_r [31:0] $end
+$var wire 32 * mem_out_a_i [31:0] $end
+$var reg 8 + addr_a [7:0] $end
+$var reg 8 , addr_b [7:0] $end
+$var reg 1 - clk $end
+$var reg 8 . k [7:0] $end
+$var reg 1 / we $end
+$var integer 32 0 i [31:0] $end
+$scope module DU $end
+$var wire 32 1 wb_real [31:0] $end
+$var wire 32 2 wb_pp4 [31:0] $end
+$var wire 32 3 wb_pp3 [31:0] $end
+$var wire 32 4 wb_pp2 [31:0] $end
+$var wire 32 5 wb_pp1 [31:0] $end
+$var wire 32 6 wb_imag [31:0] $end
+$var wire 32 7 w_real [31:0] $end
+$var wire 32 8 w_imag [31:0] $end
+$var wire 32 9 b_real [31:0] $end
+$var wire 32 : b_imag [31:0] $end
+$var wire 32 ; a_real [31:0] $end
+$var wire 32 < a_imag [31:0] $end
+$var wire 32 = B_real [31:0] $end
+$var wire 32 > B_imag [31:0] $end
+$var wire 32 ? A_real [31:0] $end
+$var wire 32 @ A_imag [31:0] $end
+$scope module add_A_imag $end
+$var wire 32 A result [31:0] $end
+$var wire 32 B b [31:0] $end
+$var wire 32 C a [31:0] $end
+$upscope $end
+$scope module add_A_real $end
+$var wire 32 D result [31:0] $end
+$var wire 32 E b [31:0] $end
+$var wire 32 F a [31:0] $end
+$upscope $end
+$scope module add_wb_imag $end
+$var wire 32 G result [31:0] $end
+$var wire 32 H b [31:0] $end
+$var wire 32 I a [31:0] $end
+$upscope $end
+$scope module mul_wi_bi $end
+$var wire 32 J result [31:0] $end
+$var wire 64 K full_product [63:0] $end
+$var wire 32 L b [31:0] $end
+$var wire 32 M a [31:0] $end
+$upscope $end
+$scope module mul_wi_br $end
+$var wire 32 N result [31:0] $end
+$var wire 64 O full_product [63:0] $end
+$var wire 32 P b [31:0] $end
+$var wire 32 Q a [31:0] $end
+$upscope $end
+$scope module mul_wr_bi $end
+$var wire 32 R result [31:0] $end
+$var wire 64 S full_product [63:0] $end
+$var wire 32 T b [31:0] $end
+$var wire 32 U a [31:0] $end
+$upscope $end
+$scope module mul_wr_br $end
+$var wire 32 V result [31:0] $end
+$var wire 64 W full_product [63:0] $end
+$var wire 32 X b [31:0] $end
+$var wire 32 Y a [31:0] $end
+$upscope $end
+$scope module sub_B_imag $end
+$var wire 32 Z b [31:0] $end
+$var wire 32 [ result [31:0] $end
+$var wire 32 \ a [31:0] $end
+$upscope $end
+$scope module sub_B_real $end
+$var wire 32 ] result [31:0] $end
+$var wire 32 ^ b [31:0] $end
+$var wire 32 _ a [31:0] $end
+$upscope $end
+$scope module sub_wb_real $end
+$var wire 32 ` a [31:0] $end
+$var wire 32 a b [31:0] $end
+$var wire 32 b result [31:0] $end
+$upscope $end
+$upscope $end
+$scope module RAM $end
+$var wire 8 c addr_a [7:0] $end
+$var wire 8 d addr_b [7:0] $end
+$var wire 1 - clk $end
+$var wire 32 e din_a_imag [31:0] $end
+$var wire 32 f din_a_real [31:0] $end
+$var wire 32 g din_b_imag [31:0] $end
+$var wire 32 h din_b_real [31:0] $end
+$var wire 1 / we $end
+$var wire 32 i dout_b_real [31:0] $end
+$var wire 32 j dout_b_imag [31:0] $end
+$var wire 32 k dout_a_real [31:0] $end
+$var wire 32 l dout_a_imag [31:0] $end
+$upscope $end
+$scope module ROM $end
+$var wire 8 m k [7:0] $end
+$var wire 32 n twiddle_real [31:0] $end
+$var wire 32 o twiddle_imag [31:0] $end
+$var wire 7 p twiddle_addr [6:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b0 p
+b0 o
+b10000000000000000000000 n
+b0 m
+b0 l
+b10000000000000000000000 k
+b0 j
+b10000000000000000000000 i
+b0 h
+b0 g
+b100000000000000000000000 f
+b0 e
+b1 d
+b0 c
+b10000000000000000000000 b
+b0 a
+b10000000000000000000000 `
+b10000000000000000000000 _
+b10000000000000000000000 ^
+b0 ]
+b0 \
+b0 [
+b0 Z
+b10000000000000000000000 Y
+b10000000000000000000000 X
+b100000000000000000000000000000000000000000000 W
+b10000000000000000000000 V
+b10000000000000000000000 U
+b0 T
+b0 S
+b0 R
+b0 Q
+b10000000000000000000000 P
+b0 O
+b0 N
+b0 M
+b0 L
+b0 K
+b0 J
+b0 I
+b0 H
+b0 G
+b10000000000000000000000 F
+b10000000000000000000000 E
+b100000000000000000000000 D
+b0 C
+b0 B
+b0 A
+b0 @
+b100000000000000000000000 ?
+b0 >
+b0 =
+b0 <
+b10000000000000000000000 ;
+b0 :
+b10000000000000000000000 9
+b0 8
+b10000000000000000000000 7
+b0 6
+b10000000000000000000000 5
+b0 4
+b0 3
+b0 2
+b10000000000000000000000 1
+b100000000 0
+0/
+b0 .
+0-
+b1 ,
+b0 +
+b0 *
+b10000000000000000000000 )
+b0 (
+b10000000000000000000000 '
+b0 &
+b100000000000000000000000 %
+b0 $
+b0 #
+b0 "
+b10000000000000000000000 !
+$end
+#5000
+1-
+#10000
+0-
+#15000
+1-
+#20000
+0-
+1/
+#25000
+b0 1
+b0 E
+b0 ^
+b0 b
+b0 5
+b0 V
+b0 `
+b0 W
+b0 '
+b0 9
+b0 P
+b0 X
+b0 i
+b100000000000000000000000 #
+b100000000000000000000000 =
+b100000000000000000000000 ]
+b100000000000000000000000 h
+b100000000000000000000000 %
+b100000000000000000000000 ?
+b100000000000000000000000 D
+b100000000000000000000000 f
+b100000000000000000000000 )
+b100000000000000000000000 ;
+b100000000000000000000000 F
+b100000000000000000000000 _
+b100000000000000000000000 k
+1-
+#30000
+0-
+0/
+#35000
+1-
+#40000
+0-
+#45000
+1-
+#50000
+0-
