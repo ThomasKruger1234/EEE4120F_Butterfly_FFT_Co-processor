@@ -53,7 +53,18 @@ module Datapath (
     input  [1:0] alu_op,        // ALU operation class for ALU_Control
 
     // --- Output to ControlUnit -----------------------------------------------
-    output [3:0] opcode         // Instruction opcode field [15:12]
+    output [3:0] opcode,        // Instruction opcode field [15:12]
+
+    // --- SoC integration: memory bus pass-through ----------------------------
+    //   The SoC's address decoder watches mem_access_addr[15] to route LD/ST
+    //   to either DataMemory (addr[15]=0) or FFT MMIO (addr[15]=1).
+    output [15:0] mem_access_addr, // ALU result; decoded by SoC
+    output       mem_read_out,   // Asserted on LDs (mirrors mem_read input)
+    input  [15:0] mmio_read_data,// SoC-driven read data for MMIO accesses
+    input        mmio_read_sel,  // 1 = MMIO read; 0 = DMem read (= addr[15])
+
+    // --- SoC integration: PC stall (FFT_RUN holds PC until fft_done) --------
+    input        stall
 );
 
     // =========================================================================
@@ -109,9 +120,11 @@ module Datapath (
     end
     
     // TODO: Update pc_current to pc_next on every positive clock edge.
-    
+    // SoC integration: when `stall` is asserted (FFT_RUN executing), hold PC.
+
     always @(posedge clk) begin
-        pc_current <= pc_next;
+        if (~stall)
+            pc_current <= pc_next;
     end
     
     // TODO: Compute pc2 = pc_current + 16'd2 using a continuous assignment.
@@ -264,14 +277,24 @@ module Datapath (
     //       The memory address comes from the ALU result (address calculation).
     //       The write data comes from RS2 (for ST instructions).
     
+    // SoC integration: gate DMem accesses so that MMIO-targeted LD/ST
+    // (alu_result[15]=1) don't alias into DMem (DMem only decodes addr[2:0]).
+    wire is_mmio_access = alu_result[15];
+    wire dmem_write_en  = mem_write & ~is_mmio_access;
+    wire dmem_read      = mem_read  & ~is_mmio_access;
+
     DataMemory dm (
         .clk             (clk),
         .mem_access_addr (alu_result),
         .mem_write_data  (reg_read_data_2),
-        .mem_write_en    (mem_write),
-        .mem_read        (mem_read),
+        .mem_write_en    (dmem_write_en),
+        .mem_read        (dmem_read),
         .mem_read_data   (mem_read_data)
     );
+
+    // SoC integration: expose memory bus for SoC's address decoder.
+    assign mem_access_addr = alu_result;
+    assign mem_read_out    = mem_read;
 
 
     // =========================================================================
@@ -281,7 +304,10 @@ module Datapath (
     //   mem_to_reg = 1 -> memory read data (for LD instruction)
     // =========================================================================
 
-    // TODO: assign reg_write_data = mem_to_reg ? mem_read_data : alu_result;
-    assign reg_write_data = mem_to_reg ? mem_read_data : alu_result;
+    // SoC integration: on LDs, select between DMem read data and SoC-driven
+    // MMIO read data based on mmio_read_sel (= alu_result[15], driven by SoC).
+    assign reg_write_data = mem_to_reg
+                          ? (mmio_read_sel ? mmio_read_data : mem_read_data)
+                          : alu_result;
 
 endmodule

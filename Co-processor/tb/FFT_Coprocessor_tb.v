@@ -41,9 +41,16 @@ module FFT_Coprocessor_tb;
     wire done;
 
     FFT_Coprocessor uut (
-        .clk  (clk),
-        .rst  (rst),
-        .done (done)
+        .clk        (clk),
+        .rst        (rst),
+        .done       (done),
+        // SoC integration ports tied to safe defaults for standalone FFT tests.
+        .ext_active (1'b0),
+        .ext_addr_a (8'd0),
+        .ext_addr_b (8'd0),
+        .ext_we     (1'b0),
+        .ext_raddr  (8'd0),
+        .ext_rdout  ()
     );
 
     // -------------------------------------------------------------------------

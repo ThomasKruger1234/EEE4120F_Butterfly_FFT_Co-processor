@@ -40,22 +40,25 @@ module ControlUnit (
     output reg       alu_src,   // 0 = RS2 register value; 1 = sign-extended immediate
     output reg       reg_dst,   // 0 = instr[8:6] (I-type WS); 1 = instr[5:3] (R-type WS)
     output reg       mem_to_reg,// 0 = ALU result; 1 = data memory read data (for LD)
-    output reg       reg_write  // Assert to write the register file on posedge clk
+    output reg       reg_write, // Assert to write the register file on posedge clk
+
+    // FFT coprocessor trigger (SoC integration)
+    output reg       fft_run    // Assert when opcode is 4'b1010 (FFT_RUN)
 );
 
     // -------------------------------------------------------------------------
     // Control signal truth table (from Section 3.3 of the manual):
     //
-    // Opcode | Instr     | RegDst | ALUSrc | MemToReg | RegWrite | MemRd | MemWr | Branch | ALUOp | Jump
-    // -------+-----------+--------+--------+----------+----------+-------+-------+--------+-------+-----
-    // 0000   | LD        |   0    |   1    |    1     |    1     |   1   |   0   |   0    |  10   |  0
-    // 0001   | ST        |   0    |   1    |    0     |    0     |   0   |   1   |   0    |  10   |  0
-    // 0010–  | R-type    |   1    |   0    |    0     |    1     |   0   |   0   |   0    |  00   |  0
-    // 1001   | (ADD–SLT) |        |        |          |          |       |       |        |       |
-    // 1010   | Reserved  |   0    |   0    |    0     |    0     |   0   |   0   |   0    |  00   |  0
-    // 1011   | BEQ       |   0    |   0    |    0     |    0     |   0   |   0   |   1    |  01   |  0
-    // 1100   | BNE       |   0    |   0    |    0     |    0     |   0   |   0   |   1    |  01   |  0
-    // 1101   | JMP       |   0    |   0    |    0     |    0     |   0   |   0   |   0    |  00   |  1
+    // Opcode | Instr     | RegDst | ALUSrc | MemToReg | RegWrite | MemRd | MemWr | Branch | ALUOp | Jump | FftRun
+    // -------+-----------+--------+--------+----------+----------+-------+-------+--------+-------+------+-------
+    // 0000   | LD        |   0    |   1    |    1     |    1     |   1   |   0   |   0    |  10   |  0   |  0
+    // 0001   | ST        |   0    |   1    |    0     |    0     |   0   |   1   |   0    |  10   |  0   |  0
+    // 0010–  | R-type    |   1    |   0    |    0     |    1     |   0   |   0   |   0    |  00   |  0   |  0
+    // 1001   | (ADD–SLT) |        |        |          |          |       |       |        |       |      |
+    // 1010   | FFT_RUN   |   0    |   0    |    0     |    0     |   0   |   0   |   0    |  00   |  0   |  1
+    // 1011   | BEQ       |   0    |   0    |    0     |    0     |   0   |   0   |   1    |  01   |  0   |  0
+    // 1100   | BNE       |   0    |   0    |    0     |    0     |   0   |   0   |   1    |  01   |  0   |  0
+    // 1101   | JMP       |   0    |   0    |    0     |    0     |   0   |   0   |   0    |  00   |  1   |  0
     //
     // For BEQ and BNE the Branch signal is asserted; the Datapath uses beq & zero_flag
     // and bne & ~zero_flag respectively to determine whether the branch is taken.
@@ -138,7 +141,8 @@ module ControlUnit (
         bne       = 1'b0;
         alu_op    = 2'b00;
         jump      = 1'b0;
-    
+        fft_run   = 1'b0;
+
         case (opcode)
             4'b0000: begin  // LD
                 reg_dst   = 1'b0;
@@ -164,9 +168,10 @@ module ControlUnit (
                 alu_op    = 2'b00; // sum of these may be redundant since these are the default values, but it's clearer to list them explicitly for R-type instructions.
             end
 
-            4'b1010: begin  // Reserved — must be a no-operation
-               // All outputs remain at safe defaults.
-               // No register or memory side-effects.
+            4'b1010: begin  // FFT_RUN — trigger FFT coprocessor
+                // No register or memory side-effects from the CPU.
+                // The SoC wrapper observes fft_run and stalls PC until done.
+                fft_run = 1'b1;
             end
     
             4'b1011: begin  // BEQ

@@ -21,7 +21,19 @@
 `include "../src/Parameter.v"
 
 module StarCore1 (
-    input clk       // System clock — drives both the Datapath and GPR/DataMemory
+    input clk,      // System clock — drives both the Datapath and GPR/DataMemory
+
+    // -------------------------------------------------------------------------
+    // SoC integration ports
+    //   Optional in standalone use: tie inputs to safe defaults and leave
+    //   outputs dangling, and the CPU behaves exactly as it does today.
+    // -------------------------------------------------------------------------
+    output [15:0] mem_access_addr, // CPU's LD/ST address (= alu_result)
+    output        mem_read_out,    // Asserted on LDs (mirrors ControlUnit.mem_read)
+    output        fft_run,         // Asserted when current opcode is 4'b1010 (FFT_RUN)
+    input         stall,           // Hold PC while high (used during FFT_RUN)
+    input  [15:0] mmio_read_data,  // SoC-driven LD data when mmio_read_sel=1
+    input         mmio_read_sel    // 1 = LD from MMIO; 0 = LD from DataMemory
 );
 
     // =========================================================================
@@ -31,7 +43,7 @@ module StarCore1 (
     // =========================================================================
 
     // TODO: Declare all internal control wires here.
-    
+
     wire        jump;
     wire        beq;
     wire        bne;
@@ -54,18 +66,24 @@ module StarCore1 (
     //       The opcode output goes to the ControlUnit input.
     
     Datapath DU (
-        .clk        (clk),
-        .jump       (jump),
-        .beq        (beq),
-        .bne        (bne),
-        .mem_read   (mem_read),
-        .mem_write  (mem_write),
-        .alu_src    (alu_src),
-        .reg_dst    (reg_dst),
-        .mem_to_reg (mem_to_reg),
-        .reg_write  (reg_write),
-        .alu_op     (alu_op),
-        .opcode     (opcode)
+        .clk             (clk),
+        .jump            (jump),
+        .beq             (beq),
+        .bne             (bne),
+        .mem_read        (mem_read),
+        .mem_write       (mem_write),
+        .alu_src         (alu_src),
+        .reg_dst         (reg_dst),
+        .mem_to_reg      (mem_to_reg),
+        .reg_write       (reg_write),
+        .alu_op          (alu_op),
+        .opcode          (opcode),
+        // SoC integration pass-throughs
+        .mem_access_addr (mem_access_addr),
+        .mem_read_out    (mem_read_out),
+        .mmio_read_data  (mmio_read_data),
+        .mmio_read_sel   (mmio_read_sel),
+        .stall           (stall)
     );
 
 
@@ -88,7 +106,8 @@ module StarCore1 (
         .alu_src    (alu_src),
         .reg_dst    (reg_dst),
         .mem_to_reg (mem_to_reg),
-        .reg_write  (reg_write)
+        .reg_write  (reg_write),
+        .fft_run    (fft_run)
     );
 
 

@@ -30,7 +30,17 @@ SRC = src/Parameter.v \
       src/Datapath.v \
       src/StarCore1.v
 
-.PHONY: all alu gpr imem dmem aluctrl ctrl integration waves clean
+.PHONY: all alu gpr imem dmem aluctrl ctrl integration soc waves clean
+
+# All FFT coprocessor source files (used by the `soc` target)
+FFT_SRC = ../Co-processor/src/Adder.v \
+          ../Co-processor/src/Subtractor.v \
+          ../Co-processor/src/Multiplier.v \
+          ../Co-processor/src/Controller.v \
+          ../Co-processor/src/ButterflyMemory.v \
+          ../Co-processor/src/ButterflyCompute.v \
+          ../Co-processor/src/TwiddleMemory.v \
+          ../Co-processor/src/FFT_Coprocessor.v
 
 # ---------------------------------------------------------------------------
 # all — run every testbench
@@ -110,6 +120,17 @@ integration: build/star_sim
 
 build/star_sim: $(SRC) tb/StarCore1_tb.v | build
 	iverilog $(IVFLAGS) -o build/star_sim $(SRC) tb/StarCore1_tb.v
+
+# ---------------------------------------------------------------------------
+# SoC elaboration check — compiles CPU + FFT + SoC.v together.
+# No SoC testbench yet; this target verifies the integration RTL parses,
+# elaborates, and is port-consistent.
+# ---------------------------------------------------------------------------
+soc: build/soc_sim
+
+build/soc_sim: $(SRC) src/SoC.v $(FFT_SRC) | build
+	iverilog $(IVFLAGS) -I ../Co-processor/src/ -o build/soc_sim \
+		-s SoC $(SRC) src/SoC.v $(FFT_SRC)
 
 # ---------------------------------------------------------------------------
 # Open the integration waveform in GTKWave

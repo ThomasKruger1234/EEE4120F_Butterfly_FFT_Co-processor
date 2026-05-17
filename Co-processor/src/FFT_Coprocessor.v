@@ -37,7 +37,20 @@
 module FFT_Coprocessor (
     input  wire clk,
     input  wire rst,
-    output wire done
+    output wire done,
+
+    // -------------------------------------------------------------------------
+    // SoC integration: pass-through to ButterflyMemory's external port
+    //   ext_active/ext_addr_a/ext_addr_b/ext_we are used by SoC.v's bit-reverse
+    //   swap FSM. ext_raddr/ext_rdout expose any rf[] entry to the SoC's MMIO
+    //   read window. Tied off in legacy testbenches.
+    // -------------------------------------------------------------------------
+    input  wire        ext_active,
+    input  wire [7:0]  ext_addr_a,
+    input  wire [7:0]  ext_addr_b,
+    input  wire        ext_we,
+    input  wire [7:0]  ext_raddr,
+    output wire [63:0] ext_rdout
 );
 
     // -------------------------------------------------------------------------
@@ -110,7 +123,14 @@ module FFT_Coprocessor (
         .dout_a_real (dout_a_real),
         .dout_a_imag (dout_a_imag),
         .dout_b_real (dout_b_real),
-        .dout_b_imag (dout_b_imag)
+        .dout_b_imag (dout_b_imag),
+        // SoC integration pass-through
+        .ext_active  (ext_active),
+        .ext_addr_a  (ext_addr_a),
+        .ext_addr_b  (ext_addr_b),
+        .ext_we      (ext_we),
+        .ext_raddr   (ext_raddr),
+        .ext_rdout   (ext_rdout)
     );
 
     // -------------------------------------------------------------------------

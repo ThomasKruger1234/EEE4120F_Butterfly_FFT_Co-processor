@@ -58,7 +58,16 @@ module StarCore1_tb;
     // -------------------------------------------------------------------------
     // DUT instantiation
     // -------------------------------------------------------------------------
-    StarCore1 uut (.clk(clk));
+    StarCore1 uut (
+        .clk             (clk),
+        // SoC integration ports tied to safe defaults for standalone CPU tests.
+        .mem_access_addr (),
+        .mem_read_out    (),
+        .fft_run         (),
+        .stall           (1'b0),
+        .mmio_read_data  (16'd0),
+        .mmio_read_sel   (1'b0)
+    );
 
     // -------------------------------------------------------------------------
     // Waveform dump — captures ALL signals in the design hierarchy
