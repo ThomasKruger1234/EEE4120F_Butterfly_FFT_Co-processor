@@ -63,8 +63,16 @@ The Twiddle Factor accounts for the phase shift between different samples by per
 
 This structure is efficient because one multiplication is used to get two difference frequency outputs. These are then layered in stages, thereby reducing the complexity from $O(N^2)$ to $O(N\log N)$.
 
-# Hardware Architecture
+# Implementation
 
+The accelerator is divided into distinct modules. These modules - along with surrounding dependencies - are shown in the high level block diagram.
+![block diagram](diagrams/block-diagram.png)
+
+The architecture diagram below focuses on how modules are connected and specified the inputs/outputs of each of these units.
+![architecture diagram](diagrams/architecture-diagram.png)
+
+The behavioural diagram shows different states and actions that cause transitions between these states. 
+![flowchart](diagrams/flowchart.jpg)
 
 
 # Credits
