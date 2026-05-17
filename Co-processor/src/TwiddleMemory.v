@@ -59,7 +59,7 @@ module TwiddleMemory (
     //       32 bits representing the imaginary part of the twiddle factor.
     // -------------------------------------------------------------------------
         initial begin
-            $readmemh("src/twiddle.data", memory, 0, 127);
+            $readmemh("../Co-processor/src/twiddle.data", memory, 0, 127);
         end
     // -------------------------------------------------------------------------
     // Drive the twiddle output with a continuous assignment.

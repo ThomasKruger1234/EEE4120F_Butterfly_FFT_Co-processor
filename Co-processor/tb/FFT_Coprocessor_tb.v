@@ -75,22 +75,59 @@ module FFT_Coprocessor_tb;
     //   Written to uut.mem.rf[bitrev8(n)] so the DIT FFT sees natural-order
     //   input when it processes stage 0.
     // -------------------------------------------------------------------------
-    integer            n;
-    real               sample;
-    reg signed [31:0]  q_real;
-    reg signed [31:0]  q_imag;
+    // integer            n;
+    // real               sample;
+    // reg signed [31:0]  q_real;
+    // reg signed [31:0]  q_imag;
 
-    task load_cosine_tone;
+    // task load_cosine_tone;
+    //     begin
+    //         for (n = 0; n < N; n = n + 1)
+    //             uut.mem.rf[n] = 64'd0;
+
+    //         for (n = 0; n < N; n = n + 1) begin
+    //             sample = $cos(2.0 * PI * K0 * n / N);
+    //             q_real = $rtoi(sample * Q_SCALE);
+    //             q_imag = 32'sd0;
+    //             uut.mem.rf[bitrev8(n[7:0])] = {q_real, q_imag};
+    //         end
+    //     end
+    // endtask
+
+	integer file_pointer;
+    integer scan_status;
+    integer n;
+    reg signed [31:0] file_real;
+    reg signed [31:0] file_imag;
+
+    task load_file_data;
         begin
-            for (n = 0; n < N; n = n + 1)
-                uut.mem.rf[n] = 64'd0;
-
+            // 1. Clear the memory initially
             for (n = 0; n < N; n = n + 1) begin
-                sample = $cos(2.0 * PI * K0 * n / N);
-                q_real = $rtoi(sample * Q_SCALE);
-                q_imag = 32'sd0;
-                uut.mem.rf[bitrev8(n[7:0])] = {q_real, q_imag};
+                uut.mem.rf[n] = 64'd0;
             end
+
+            // 2. Open the memory file
+            file_pointer = $fopen("../Golden-Measures/input_sequential.mem", "r");
+            if (file_pointer == 0) begin
+                $display("ERROR: Could not open input_sequential.mem");
+                $finish;
+            end
+
+            // 3. Read pairs sequentially and store them in bit-reversed order
+            for (n = 0; n < N; n = n + 1) begin
+                // Read real line (hexadecimal)
+                scan_status = $fscanf(file_pointer, "%h\n", file_real);
+                // Read imaginary line (hexadecimal)
+                scan_status = $fscanf(file_pointer, "%h\n", file_imag);
+                
+                // Pack real [63:32] and imaginary [31:0] into the bit-reversed index
+                uut.mem.rf[bitrev8(n[7:0])] = {file_real, file_imag};
+            end
+
+            // 4. Close file descriptor
+            $fclose(file_pointer);
+            $display("Successfully loaded %0d samples from file into bit-reversed memory.", N);
         end
     endtask
 
@@ -131,7 +168,7 @@ module FFT_Coprocessor_tb;
 
         rst = 1'b1;
         @(posedge clk);
-        load_cosine_tone;
+        load_file_data;
         @(posedge clk);
 
         @(negedge clk);

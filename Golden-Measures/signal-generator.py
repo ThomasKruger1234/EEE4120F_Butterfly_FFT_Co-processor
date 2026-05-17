@@ -1,6 +1,6 @@
 import math
 # Define the frequencies present in your telemetry signal (in Hz)
-frequencies = [10, 25]  
+frequencies = [1, 10, 127]  
 
 def to_q10_22_hex(val):
     """Converts a float value to a 32-bit signed Q10.22 hex string."""
