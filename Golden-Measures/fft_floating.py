@@ -103,8 +103,8 @@ if __name__ == "__main__":
     # Run built-in Python/NumPy-equivalent validation using math/cmath 
     # (Just using a basic DFT math formula to double-check a few points)
     print("FFT successfully executed!")
-    print("\nFirst 5 Frequency Bin Results (Complex Numbers):")
-    for i in range(5):
+    print("\nFrequency Bin Results (Complex Numbers):")
+    for i in range(256):
         print(f"Bin {i}: {fft_custom[i]:.4f}")
         
     print("\nPeak Check:")

@@ -141,7 +141,7 @@ if __name__ == "__main__":
     
     print("Fixed-Point (Q10.22) FFT complete.")
     print("\nFirst 5 Bins in Raw Q10.22 Form (Integers):")
-    for i in range(5):
+    for i in range(256):
         print(f"Bin {i} -> Real: {X_fixed_real[i]}, Imag: {X_fixed_imag[i]}")
             
     # Assuming X_fixed_real and X_fixed_imag are the integer outputs from the FFT...
