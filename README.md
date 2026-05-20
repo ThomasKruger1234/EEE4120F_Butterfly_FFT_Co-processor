@@ -82,7 +82,7 @@ The behavioural diagram shows different states and actions that cause transition
 
 First, create the input signal by setting a list of frequencies at the top of  `Golden-Measures/signal-generator.py` and running the script. The signal will be stored as a text file (`input-sequence.mem`) which is referenced when running the simulations. Each pair of lines represents the real and complex part (the file should have 512 lines). Run either of the software implementations with `python fft-fixed.py` or `python fft-floating.py`. This should correctly identify the frequencies in the signal.
 
-To run the simulation, navigate to the `Verilog-Files` directory and execute:
+To run the simulation, navigate to the `StarCore1` directory and execute:
 ``` shell
 make soc_run
 ```
