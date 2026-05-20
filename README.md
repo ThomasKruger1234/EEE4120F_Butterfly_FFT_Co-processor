@@ -76,6 +76,18 @@ The behavioural diagram shows different states and actions that cause transition
 ![flowchart](diagrams/flowchart.jpg)
 
 
+# Testing
+
+First, create the input signal by setting a list of frequencies at the top of  `Golden-Measures/signal-generator.py` and running the script. The signal will be stored as a text file (`input-sequence.mem`) which is referenced when running the simulations. Each pair of lines represents the real and complex part (the file should have 512 lines). Run either of the software implementations with `python fft-fixed.py` or `python fft-floating.py`. This should correctly identify the frequencies in the signal.
+
+To run the simulation, navigate to the `Verilog-Files` directory and execute:
+``` shell
+make soc_run
+```
+This will print the magnitude at each of the frequency bins. Non-zero magnitudes should match the selected frequencies. This output can be compared to the golden measure for accuracy/precision.
+
+To view the waveform, use [GTKWave](https://github.com/gtkwave/gtkwave) and open the file under the waves directory (`waves`): `gtkwave waves/soc_run.vcd`. This file is tracked by the version control and can be inspected even without running the simulation.
+
 # Credits
 
 This topic and the base code was provided by the Professor Simon Winberg and EEE4120F team at UCT.  
