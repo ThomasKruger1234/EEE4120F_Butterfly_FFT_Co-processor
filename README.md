@@ -69,10 +69,12 @@ The accelerator is divided into distinct modules. These modules - along with sur
 
 <img src="diagrams/block-diagram.png" width="500" />
 
-The architecture diagram below focuses on how modules are connected and specified the inputs/outputs of each of these units.
+The architecture diagram below focuses on how modules are connected and specifies the inputs/outputs of each of these units.
+
 ![architecture diagram](diagrams/architecture-diagram.png)
 
 The behavioural diagram shows different states and actions that cause transitions between these states. 
+
 ![flowchart](diagrams/flowchart.jpg)
 
 
